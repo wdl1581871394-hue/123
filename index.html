@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>往事变作草芥随风散 📅</title>
+    
+    <style>
+        @import url('https://cdn.staticfile.org/lxgw-wenkai-screen-webfont/1.6.0/lxgwwenkaiscreen.css');
+
+        :root {
+            --retro-green: #1f5f39; 
+            --retro-red: #a52a20;   
+            --paper-bg: #EAE1D0;    
+            --text-dark: #2b2b2b;
+            --note-bg: #FDF3AE; 
+        }
+
+        body {
+            font-family: 'LXGW WenKai Screen', 'PingFang SC', serif;
+            background-color: #222; 
+            background-image: radial-gradient(#333 1px, transparent 1px);
+            background-size: 20px 20px;
+            margin: 0; padding: 20px;
+            display: flex; justify-content: center; align-items: center;
+            min-height: 100vh; overflow-x: hidden;
+        }
+
+        .book-wrapper {
+            position: relative; max-width: 980px; width: 100%; height: 760px; 
+            perspective: 2500px; transform-style: preserve-3d;
+        }
+
+        .old-paper {
+            background-color: var(--paper-bg); box-shadow: 0 15px 40px rgba(0,0,0,0.6);
+            border-radius: 2px; padding: 25px; border: 1px solid #C4B79E;
+            box-sizing: border-box; height: 100%; 
+        }
+        .old-paper::before {
+            content: ''; position: absolute; top: -10px; left: 0; right: 0; height: 15px;
+            background-image: radial-gradient(circle, transparent 4px, var(--paper-bg) 5px);
+            background-size: 15px 15px; background-position: -7px -7px;
+        }
+
+        /* 封面层 */
+        .cover-page {
+            position: absolute; top: 0; left: 0; width: 100%; z-index: 100;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            text-align: center; transform-origin: 0% 0%; background-color: var(--paper-bg);
+        }
+        .cover-content { border: 2px dashed var(--retro-green); padding: 50px 40px; width: 80%; background-color: rgba(255,255,255,0.2); pointer-events: none; }
+        .cover-title { font-size: 42px; color: var(--retro-green); font-weight: bold; margin-bottom: 25px; letter-spacing: 4px; }
+        .cover-subtitle { font-size: 18px; color: #555; margin-bottom: 20px; line-height: 2; }
+
+        .corner-btn {
+            position: absolute; bottom: 0; right: 0; background-color: var(--retro-red); color: var(--paper-bg);
+            padding: 15px 30px; font-size: 18px; font-family: 'LXGW WenKai Screen', serif; cursor: pointer;
+            border-radius: 40px 0 2px 0; box-shadow: -4px -4px 15px rgba(165, 42, 32, 0.3);
+            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1); z-index: 200; display: flex; align-items: center; gap: 5px;
+        }
+        .corner-btn:hover { padding: 25px 40px; background-color: #801e16; box-shadow: -8px -8px 25px rgba(165, 42, 32, 0.4); }
+
+        .peel-off { animation: softPeel 2.5s cubic-bezier(0.45, 0.05, 0.22, 1) forwards; pointer-events: none; }
+        @keyframes softPeel {
+            0% { transform: rotate3d(0, 0, 0, 0deg); border-bottom-right-radius: 2px; }
+            30% { border-bottom-right-radius: 500px; transform: rotate3d(-1, 1, 0, 20deg) translate(-2%, -2%); box-shadow: -20px 30px 50px rgba(0,0,0,0.5); }
+            100% { border-bottom-right-radius: 1200px; transform: rotate3d(-1, 1.2, 0, 110deg) translate(-15%, -15%) translateZ(300px); opacity: 0; box-shadow: none; }
+        }
+
+        /* 主体层 */
+        .main-page { position: relative; z-index: 1; width: 100%; height: 100%; }
+        .inner-border { 
+            border: 4px solid var(--retro-green); padding: 15px; display: flex; gap: 25px; position: relative; height: 100%; box-sizing: border-box;
+            opacity: 0; transition: opacity 2.5s ease-in-out; 
+        }
+        .inner-border.show { opacity: 1; }
+        .inner-border::after { content: ''; position: absolute; top: 4px; bottom: 4px; left: 4px; right: 4px; border: 1px solid var(--retro-green); pointer-events: none; }
+
+        .left-col { flex: 0.9; display: flex; flex-direction: column; border-right: 2px solid var(--retro-green); padding-right: 25px; }
+        .right-col { flex: 1.3; display: flex; flex-direction: column; justify-content: space-between; position: relative; }
+
+        /* 左侧老黄历 */
+        .header { display: flex; justify-content: space-between; border-bottom: 2px solid var(--retro-green); padding-bottom: 8px; margin-bottom: 15px; font-weight: bold; color: var(--retro-green); font-size: 18px;}
+        .main-date-area { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .couplet { writing-mode: vertical-rl; font-size: 22px; font-weight: bold; color: var(--retro-green); letter-spacing: 6px; text-shadow: 1px 1px 0 rgba(0,0,0,0.05);}
+        .big-number { font-family: 'Impact', sans-serif; font-size: 150px; line-height: 1; color: var(--retro-green); text-shadow: 3px 3px 0px rgba(0,0,0,0.1); transform: scaleY(1.1); margin: 0 10px;}
+        .weekend-red { color: var(--retro-red) !important; }
+
+        .lunar-banner { display: flex; border: 2px solid var(--retro-green); text-align: center; font-weight: bold; color: var(--retro-green); font-size: 16px; margin-bottom: 10px; background-color: rgba(31, 95, 57, 0.05);}
+        .lunar-banner div { flex: 1; padding: 6px 0; border-right: 2px solid var(--retro-green); }
+        .lunar-banner div:last-child { border-right: none; }
+
+        .retro-grid { display: grid; grid-template-columns: repeat(3, 1fr); border: 2px solid var(--retro-green); margin-bottom: 15px; font-size: 14px; text-align: center; color: var(--retro-green); font-weight: bold;}
+        .retro-grid div { border-right: 1px solid var(--retro-green); border-bottom: 1px solid var(--retro-green); padding: 8px 4px; display: flex; flex-direction: column; justify-content: center; }
+        .retro-grid div:nth-child(3n) { border-right: none; }
+        .retro-grid div:nth-child(n+4) { border-bottom: none; }
+        .grid-val { color: var(--text-dark); font-weight: normal; margin-top: 4px; font-size: 13px;}
+
+        .yiji-classic { display: flex; border: 2px solid var(--retro-green); flex-grow: 1; }
+        .yj-btn { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: 0.3s; position: relative;}
+        .yj-btn:first-child { border-right: 2px solid var(--retro-green); }
+        .yj-btn:hover { background-color: rgba(31, 95, 57, 0.08); }
+        .yj-circle { width: 45px; height: 45px; border-radius: 50%; color: #fff; display: flex; justify-content: center; align-items: center; font-size: 24px; font-weight: bold; margin-bottom: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.2);}
+        .yj-btn.good .yj-circle { background-color: var(--retro-red); border: 2px solid var(--paper-bg); }
+        .yj-btn.bad .yj-circle { background-color: var(--text-dark); border: 2px solid var(--paper-bg); }
+        .yj-text { font-size: 28px; font-weight: bold; letter-spacing: 4px; color: var(--text-dark); margin-left: 4px;}
+        .yj-hint { position: absolute; bottom: 5px; font-size: 12px; opacity: 0.6; color: var(--text-dark);}
+
+        /* 右侧交互 */
+        .history-box { 
+            border: 2px solid var(--retro-green); background-color: rgba(31, 95, 57, 0.05); 
+            padding: 12px 15px; border-radius: 2px; position: relative; margin-bottom: 15px;
+            height: 90px; box-sizing: border-box; overflow: hidden;
+        }
+        .history-title { display: inline-block; background-color: var(--retro-red); color: var(--paper-bg); padding: 2px 10px; font-weight: bold; font-size: 14px; margin-bottom: 5px; letter-spacing: 2px; }
+        
+        .butler-box { 
+            background-color: var(--paper-bg); border: 1px solid #dcd3b6; padding: 20px 15px 15px; 
+            border-radius: 2px; position: relative; height: 120px; box-sizing: border-box; margin-bottom: 15px;
+            background-image: repeating-linear-gradient(transparent, transparent 27px, rgba(165, 42, 32, 0.15) 28px);
+            background-position: 0 14px; box-shadow: inset 0 0 10px rgba(0,0,0,0.02);
+        }
+        .butler-title { position: absolute; top: -12px; left: 20px; background: var(--paper-bg); color: var(--retro-red); padding: 0 10px; font-weight: bold; border: 1px solid var(--retro-red); font-size: 14px; letter-spacing: 2px; }
+        .butler-content { font-size: 16px; line-height: 28px; color: var(--text-dark); height: 84px; overflow: hidden; } 
+
+        .info-grid { display: flex; gap: 12px; margin-bottom: 15px; height: 90px; box-sizing: border-box; }
+        .info-card { flex: 1; cursor: pointer; transition: all 0.3s; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; overflow: hidden; box-sizing: border-box; }
+        .card-weather { border: 2px solid var(--retro-green); background-color: rgba(31, 95, 57, 0.05); border-radius: 10px 30px 10px 30px; }
+        .card-health { border: 2px solid var(--retro-red); background-color: rgba(165, 42, 32, 0.05); border-radius: 4px; }
+        .card-countdown { border: 2px dashed #8b6b43; background-color: rgba(139, 107, 67, 0.08); border-radius: 4px; }
+        .info-card:hover { transform: translateY(-2px); box-shadow: 2px 4px 10px rgba(0,0,0,0.1);}
+        
+        .info-title { font-size: 16px; font-weight: bold; letter-spacing: 2px; z-index: 2;}
+        .info-action { font-size: 12px; margin-top: 6px; opacity: 0.8; z-index: 2;}
+
+        .sticky-board { display: flex; flex-wrap: wrap; gap: 15px; height: 135px; overflow: hidden; align-content: flex-start;} 
+        .sticky-note { background-color: var(--note-bg); width: 130px; padding: 12px; box-shadow: 2px 4px 6px rgba(0,0,0,0.1); position: relative; transform: rotate(-2deg); transition: transform 0.3s; }
+        .sticky-note:nth-child(even) { transform: rotate(3deg); }
+        .sticky-note:hover { transform: scale(1.05) rotate(0deg); z-index: 10; }
+        .sticky-note::before { content: ''; position: absolute; top: -8px; left: 50%; transform: translateX(-50%) rotate(-2deg); width: 50px; height: 12px; background-color: rgba(255, 255, 255, 0.5); box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+        .note-text { font-size: 14px; color: #555; line-height: 1.5; word-wrap: break-word; }
+        .note-date { font-size: 11px; color: #999; text-align: right; margin-top: 8px; border-top: 1px dotted #ccc; padding-top: 3px; }
+
+        .btn-add-note { background-color: var(--note-bg); color: var(--text-dark); border: 1px dashed var(--retro-green); padding: 5px 12px; font-family: 'LXGW WenKai Screen', serif; cursor: pointer; transition: all 0.3s; box-shadow: 2px 2px 0 rgba(0,0,0,0.1); font-size: 14px;}
+        .btn-add-note:hover { background-color: #fceb86; transform: translateY(-2px); }
+
+        .pen-cursor { display: inline-block; color: var(--retro-red); animation: writeBlink 0.3s infinite alternate; }
+        @keyframes writeBlink { 0% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(-3px); opacity: 0.5; } }
+        
+        @media (max-width: 768px) { .book-wrapper { height: auto; } .inner-border { flex-direction: column; } .left-col { border-right: none; border-bottom: 2px dashed rgba(36,107,67,0.4); padding-bottom: 20px; padding-right: 0;} .retro-grid{ font-size: 12px; } }
+
+        /* 弹窗样式 */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: none; justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(3px); }
+        
+        .modal-form { background: var(--note-bg); padding: 30px; border-radius: 2px; width: 320px; box-shadow: 0 15px 40px rgba(0,0,0,0.4); border: 1px solid #d4c58b;}
+        .modal-form textarea, .modal-form input { width: 100%; box-sizing: border-box; background: transparent; border: none; border-bottom: 1px solid #a89f7a; font-family: 'LXGW WenKai Screen', serif; font-size: 16px; outline: none; margin-bottom: 15px; color: var(--text-dark);}
+        .modal-form textarea { height: 80px; resize: none; }
+        .modal-form input[type="date"] { padding-bottom: 5px; }
+        
+        .modal-content-detail { background: var(--paper-bg); padding: 35px 30px; border: 2px solid var(--retro-green); border-radius: 2px; width: 320px; box-shadow: 0 15px 50px rgba(0,0,0,0.6); text-align: center; position: relative;}
+        .modal-content-detail::before { content:''; position: absolute; top: 6px; bottom: 6px; left: 6px; right: 6px; border: 1px solid var(--retro-green); opacity: 0.4; pointer-events: none;}
+        
+        .detail-modal-title { font-size: 24px; font-weight: bold; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px dashed var(--retro-green); letter-spacing: 2px;}
+        .detail-modal-text { font-size: 17px; line-height: 1.8; color: var(--text-dark); min-height: 90px; text-align: left; }
+
+        .modal-btn { background: var(--retro-green); color: var(--paper-bg); border: 1px solid var(--retro-green); padding: 8px 20px; cursor: pointer; font-family: 'LXGW WenKai Screen', serif; transition: 0.3s; font-size: 16px; letter-spacing: 2px;}
+        .modal-btn:hover { background: var(--paper-bg); color: var(--retro-green); }
+    </style>
+</head>
+<body>
+
+<!-- 本地音频源 (确保 bgm.mp3, flip.mp3, pen.mp3 放在同一个文件夹下) -->
+<audio id="bgm" loop preload="auto"><source src="bgm.mp3" type="audio/mpeg"></audio>
+<audio id="sfx-flip" preload="auto"><source src="flip.mp3" type="audio/mpeg"></audio>
+<audio id="sfx-pen" loop preload="auto"><source src="pen.mp3" type="audio/mpeg"></audio>
+
+<div class="book-wrapper">
+    <div class="cover-page old-paper" id="cover-page">
+        <div class="cover-content">
+            <div class="cover-title">往事变作草芥随风散</div>
+            <div class="cover-subtitle" id="cover-subtitle">加载中...</div>
+        </div>
+        <div class="corner-btn" onclick="startJourney()">✒️ 舒缓翻开今日</div>
+    </div>
+
+    <div class="main-page old-paper" id="main-container">
+        <div class="inner-border" id="inner-content">
+            <div class="left-col">
+                <div class="header">
+                    <span id="month-en"></span>
+                    <span style="border: 2px solid var(--retro-green); padding: 2px 10px; border-radius: 15px;" id="year-num"></span>
+                    <span id="month-zh"></span>
+                </div>
+
+                <div class="main-date-area">
+                    <div class="couplet" id="couplet-left"></div>
+                    <div class="big-number" id="big-day"></div>
+                    <div class="couplet" id="couplet-right"></div>
+                </div>
+
+                <div class="lunar-banner">
+                    <div id="lunar-year"></div>
+                    <div id="lunar-date"></div>
+                    <div id="week-day"></div>
+                </div>
+
+                <div class="retro-grid">
+                    <div>吉神方位<div class="grid-val">你心里</div></div>
+                    <div>今日五行<div class="grid-val">缺烦恼</div></div>
+                    <div>每日胎神<div class="grid-val">占门外南</div></div>
+                    <div>彭祖百忌<div class="grid-val">勿生闷气</div></div>
+                    <div>冲煞方位<div class="grid-val">煞向emo</div></div>
+                    <div>今日八字<div class="grid-val">大吉大利</div></div>
+                </div>
+
+                <div class="yiji-classic">
+                    <div class="yj-btn good" onclick="openDetailModal('yi')">
+                        <div class="yj-circle">宜</div>
+                        <div class="yj-text" id="yi-keyword"></div>
+                        <div class="yj-hint">👆 窥探天机</div>
+                    </div>
+                    <div class="yj-btn bad" onclick="openDetailModal('ji')">
+                        <div class="yj-circle">忌</div>
+                        <div class="yj-text" id="ji-keyword"></div>
+                        <div class="yj-hint">👆 趋吉避凶</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="right-col">
+                <div class="history-box">
+                    <div class="history-title">📜 今日史记</div>
+                    <div style="font-size: 14px; color: var(--text-dark); line-height: 1.6;" id="history-content"></div>
+                </div>
+
+                <div class="butler-box">
+                    <div class="butler-title">日历君的私语</div>
+                    <div class="butler-content" id="butler-message"></div>
+                </div>
+
+                <div class="info-grid">
+                    <div class="info-card card-weather" onclick="openDetailModal('weather')">
+                        <div class="info-title" style="color: var(--retro-green);">🌤️ 观天象</div>
+                        <div class="info-action" style="color: var(--retro-green);">👉 洞察天机</div>
+                    </div>
+                    <div class="info-card card-health" onclick="openDetailModal('health')">
+                        <div class="info-title" style="color: var(--retro-red);">💪 坊间叮嘱</div>
+                        <div class="info-action" style="color: var(--retro-red);">👉 拆开锦囊</div>
+                    </div>
+                    <div class="info-card card-countdown" onclick="openCountdownModal()">
+                        <div class="info-title" style="color: #8b6b43;">🎯 盼头账本</div>
+                        <div class="info-action" style="color: #8b6b43;" id="countdown-btn-text">👉 记下期盼</div>
+                    </div>
+                </div>
+
+                <div style="flex-grow: 1;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <span style="font-weight: bold; color: var(--retro-green); border-bottom: 2px solid var(--retro-red); padding-bottom: 2px;">客官的角落</span>
+                        <button class="btn-add-note" onclick="openNoteModal()">+ 贴张情绪便签 ✎</button>
+                    </div>
+                    <div class="sticky-board" id="note-board"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="note-modal">
+    <div class="modal-form">
+        <div style="text-align: center; margin-bottom: 15px; color: var(--retro-green); font-weight: bold; font-size: 18px;">记录当下的心情</div>
+        <textarea id="note-input" placeholder="今天过得怎么样？写下来，绝对安全地保存在您的本地设备中..."></textarea>
+        <div style="display: flex; justify-content: space-between;">
+            <button class="modal-btn" style="background: transparent; color: #666; border-color: #ccc;" onclick="closeModal('note-modal')">取消</button>
+            <button class="modal-btn" onclick="saveNote()">贴上黄历</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="countdown-modal">
+    <div class="modal-form">
+        <div style="text-align: center; margin-bottom: 15px; color: #8b6b43; font-weight: bold; font-size: 18px;">记下心中的期盼</div>
+        <input type="text" id="cd-event" placeholder="客官，您在期盼什么？(如: 见某人)">
+        <input type="date" id="cd-date">
+        <div style="display: flex; justify-content: space-between; margin-top: 10px;">
+            <button class="modal-btn" style="background: transparent; color: #666; border-color: #ccc;" onclick="closeModal('countdown-modal')">取消</button>
+            <button class="modal-btn" style="background: #8b6b43; border-color: #8b6b43;" onclick="saveCountdown()">落笔</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="detail-modal">
+    <div class="modal-content-detail">
+        <div class="detail-modal-title" id="detail-modal-title"></div>
+        <div class="detail-modal-text" id="detail-modal-text"></div>
+        <button class="modal-btn" style="margin-top: 25px;" onclick="closeDetailModal()">知晓了</button>
+    </div>
+</div>
+
+<script>
+    // === 手机端防拦截与权限全开黑科技 ===
+    let audioUnlocked = false;
+    function unlockAudio() {
+        if(audioUnlocked) return;
+        const pen = document.getElementById('sfx-pen');
+        if(pen) {
+            // 在触摸屏幕的瞬间，快速播放一次并暂停，拿到 iOS/Android 的音频控制权！
+            let playPromise = pen.play();
+            if (playPromise !== undefined) {
+                playPromise.then(() => {
+                    pen.pause();
+                    pen.currentTime = 0;
+                }).catch(e=>{});
+            }
+        }
+        audioUnlocked = true;
+        document.removeEventListener('touchstart', unlockAudio);
+        document.removeEventListener('click', unlockAudio);
+    }
+    // 监听任意手势解锁音频引擎
+    document.addEventListener('touchstart', unlockAudio, {once: true, passive: true});
+    document.addEventListener('click', unlockAudio, {once: true, passive: true});
+
+    // === 万年历引擎 ===
+    const today = new Date();
+    const currentYear = today.getFullYear();
+    const currentMonth = today.getMonth(); 
+    const currentDate = today.getDate();
+    const currentDay = today.getDay(); 
+    
+    const daySeed = currentYear * 1000 + (currentMonth + 1) * 100 + currentDate; 
+    function seededRandom(seedOffset) { let x = Math.sin(daySeed + seedOffset) * 10000; return x - Math.floor(x); }
+
+    const monthEnNames =["JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE", "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER"];
+    const monthZhNames =["一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "十一月", "十二月"];
+    const weekNames =["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"];
+
+    document.addEventListener("DOMContentLoaded", () => {
+        document.getElementById('cover-subtitle').innerHTML = `${currentYear}年${currentMonth + 1}月${currentDate}日，${weekNames[currentDay]}。<br>昨日的纷扰与疲惫，已被老旧的黄历吸收。<br>客官，让往事随风，该翻篇啦。<br>`;
+        document.getElementById('month-en').innerText = monthEnNames[currentMonth];
+        document.getElementById('year-num').innerText = `[${currentYear}]`;
+        document.getElementById('month-zh').innerText = monthZhNames[currentMonth] + ([1,3,5,7,8,10,12].includes(currentMonth + 1) ? "大" : "平");
+        
+        const bigDayEl = document.getElementById('big-day');
+        bigDayEl.innerText = currentDate;
+        if(currentDay === 0 || currentDay === 6) { bigDayEl.classList.add('weekend-red'); }
+
+        const tiangan =["甲","乙","丙","丁","戊","己","庚","辛","壬","癸"];
+        const dizhi =["子","丑","寅","卯","辰","巳","午","未","申","酉","戌","亥"];
+        document.getElementById('lunar-year').innerText = tiangan[(currentYear-4)%10] + dizhi[(currentYear-4)%12] + "年";
+        
+        const mockLunarDays =["初一","初二","初三","初四","初五","初六","初七","初八","初九","初十","十一","十二","十三","十四","十五","十六","十七","十八","十九","二十","廿一","廿二","廿三","廿四","廿五","廿六","廿七","廿八","廿九","三十"];
+        document.getElementById('lunar-date').innerText = monthZhNames[currentMonth] + mockLunarDays[(currentDate + Math.floor(seededRandom(5)*10)) % 30];
+        document.getElementById('week-day').innerText = weekNames[currentDay];
+
+        const couplets = [["烟火人间又是一天","岁月静好满心欢喜"],["花开花落又是一季","云卷云舒任由天意"],["三餐四季温柔以待","平安喜乐万事胜意"],["行至水穷且坐看云","心无挂碍便是清欢"]];
+        const selectedCouplet = couplets[Math.floor(seededRandom(6) * couplets.length)];
+        document.getElementById('couplet-left').innerHTML = selectedCouplet[0].substring(0,4) + "<br>" + selectedCouplet[0].substring(4);
+        document.getElementById('couplet-right').innerHTML = selectedCouplet[1].substring(0,4) + "<br>" + selectedCouplet[1].substring(4);
+
+        updateCountdownCard();
+    });
+
+    const yiList =[{ short: "出行", long: "今天出门会有好运哦，连吹来的风都是温柔的。" }, { short: "散步", long: "放下手机去楼下走走吧，说不定会撞见满眼的风景。" }, { short: "干饭", long: "宜用美食犒劳自己，火锅烤肉都在向你招手！" }, { short: "发呆", long: "生活需要适度留白，今天非常适合坐在窗边虚度光阴。" }, { short: "早睡", long: "今晚把烦恼留在梦境之外，早早钻进被窝里充个电吧。" }, { short: "联系", long: "宜给久未谋面的老友发个信，聊聊近况。" }, { short: "听歌", long: "戴上耳机，播放一首喜欢的纯音乐，世界都会安静下来。" }];
+    const jiList =[{ short: "内卷", long: "大好时光，如果天气不错，偷偷摸个鱼才是正经事。" }, { short: "熬夜", long: "月亮不睡你不睡，你的头发说它真的很崩溃！" }, { short: "焦虑", long: "忌为明天的事发愁。车到山前必有路，船到桥头自然直。" }, { short: "生气", long: "气出病来无人替，深呼吸，别让烂事破坏了你的风水。" }, { short: "抱怨", long: "少看一眼糟心事，多看一眼路边的花花草草。" }, { short: "犹豫", long: "想做的事就去做，别把时间浪费在纠结上。" }];
+    const healthTips =["久坐伤腰，财气不通哦！赶紧站起来像猫咪一样伸个大懒腰！", "不管多忙，喝水可是人生大事。快去给自己倒杯温水吧！", "夜里子时前入睡，养肝护发。千万别熬夜修仙了。", "盯着屏幕太久了吧？现在立刻看一眼窗外最绿的那棵树！", "如果觉得累了，闭上眼睛深呼吸三次。天塌下来有高个子顶着，你先顾好情绪。"];
+    
+    const todayYi = yiList[Math.floor(seededRandom(1) * yiList.length)];
+    const todayJi = jiList[Math.floor(seededRandom(2) * jiList.length)];
+    let currentTipIndex = Math.floor(seededRandom(3) * healthTips.length);
+    
+    document.getElementById('yi-keyword').innerText = todayYi.short;
+    document.getElementById('ji-keyword').innerText = todayJi.short;
+    let globalWeatherText = "日历君正在努力夜观天象，请稍后再试...";
+
+    // === 平滑收音算法 ===
+    function fadeOutAudio(audioElement, durationMs) {
+        if (!audioElement) return;
+        const steps = durationMs / 50; 
+        const volumeStep = audioElement.volume / steps;
+        
+        const fadeInterval = setInterval(() => {
+            if (audioElement.volume - volumeStep > 0.05) {
+                audioElement.volume -= volumeStep;
+            } else {
+                audioElement.volume = 0;
+                audioElement.pause();
+                clearInterval(fadeInterval);
+            }
+        }, 50);
+    }
+
+    // === 翻页执行与时机控制 ===
+    function startJourney() {
+        const bgm = document.getElementById('bgm');
+        const sfxFlip = document.getElementById('sfx-flip');
+        
+        // 直接在 Click 事件中播放，手机端百分百放行！
+        if(bgm) { 
+            bgm.volume = 0.15; 
+            bgm.play().catch(e => console.log('BGM Play Error:', e)); 
+        }
+        if(sfxFlip) { 
+            sfxFlip.volume = 1.0; 
+            sfxFlip.currentTime = 0; 
+            sfxFlip.play().catch(e => console.log('Flip Play Error:', e)); 
+            
+            // 翻纸声渐渐收音（1.5秒后开始变弱）
+            setTimeout(() => { fadeOutAudio(sfxFlip, 800); }, 1500);
+        }
+
+        const coverPage = document.getElementById('cover-page');
+        if (!coverPage) return;
+        coverPage.querySelector('.corner-btn').style.pointerEvents = 'none';
+        coverPage.classList.add('peel-off');
+
+        setTimeout(() => {
+            coverPage.style.display = 'none'; 
+            document.getElementById('inner-content').classList.add('show');
+            setTimeout(() => { beginWritingMagic(); }, 1500); 
+        }, 2500); 
+    }
+
+    // === 真实API联网 ===
+    async function fetchHistoryAPI() {
+        const fallbacks =["历史上的今天，一定有个伟大的人吃撑了打了个嗝。虽无记载，但老伙计猜一定有。", "翻遍了古籍，今天最伟大的历史事件，就是您平平安安地醒来，准备迎接新的一天！"];
+        try {
+            const res = await fetch('https://api.oick.cn/lishi/api.php');
+            const data = await res.json();
+            if (data && data.result && data.result.length > 0) {
+                const validEvents = data.result.filter(e => e.title.length < 30);
+                const event = validEvents.length > 0 ? validEvents[Math.floor(seededRandom(4)*validEvents.length)] : data.result[0];
+                return `<b>${event.date}</b>：${event.title}。<br>老伙计感叹，历史的惊涛骇浪，终究成了咱们桌上的谈资。`;
+            }
+        } catch(e) {}
+        return fallbacks[Math.floor(seededRandom(4) * fallbacks.length)];
+    }
+
+    async function fetchWeatherTip() {
+        let cityEn = "远方";
+        try {
+            const locRes = await fetch('https://get.geojs.io/v1/ip/geo.json');
+            const locData = await locRes.json();
+            cityEn = locData.city || locData.country || "远方";
+            const weatherRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${locData.latitude}&longitude=${locData.longitude}&current_weather=true`);
+            const weatherData = await weatherRes.json();
+            return `日历君夜观天象，感知到远方的 <b>${cityEn}</b> 此刻气温约为 ${weatherData.current_weather.temperature}℃。无论窗外是阴是晴，出门都请带上属于此刻的好心情！`;
+        } catch (e) {
+            return `日历君眺望着远方 <b>${cityEn}</b> 的天空，为您祈求了一整天的晴朗。出门记得照顾好自己哦。`;
+        }
+    }
+
+    // === 写字引擎：调用正统 Play/Pause 释放性能 ===
+    let activeWriters = 0; 
+    let writeTokens = {};
+    async function penWriteHTML(elementId, htmlString, speed = 40) {
+        const token = Symbol(); writeTokens[elementId] = token;
+        const sfxPenInstance = document.getElementById('sfx-pen');
+        
+        activeWriters++; 
+        if (activeWriters === 1 && sfxPenInstance) { 
+            sfxPenInstance.volume = 0.9; 
+            sfxPenInstance.currentTime = 0;
+            sfxPenInstance.play().catch(e=>{}); 
+        }
+
+        const el = document.getElementById(elementId); if(!el) return;
+        el.innerHTML = ''; let currentHTML = ''; let i = 0;
+        let cursor = el.parentNode.querySelector('.pen-cursor');
+        if(!cursor) { cursor = document.createElement('span'); cursor.className = 'pen-cursor'; cursor.innerHTML = '✒️'; el.parentNode.insertBefore(cursor, el.nextSibling); }
+        cursor.style.display = 'inline-block';
+
+        while (i < htmlString.length) {
+            if (writeTokens[elementId] !== token) break;
+            if (htmlString[i] === '<') {
+                let tag = ''; while (htmlString[i] !== '>' && i < htmlString.length) { tag += htmlString[i]; i++; } tag += '>'; currentHTML += tag;
+            } else {
+                currentHTML += htmlString[i]; i++; el.innerHTML = currentHTML;
+                await new Promise(r => setTimeout(r, speed + Math.random() * 20)); 
+            }
+        }
+        
+        if (writeTokens[elementId] === token) { cursor.style.display = 'none'; el.innerHTML = currentHTML; }
+        
+        activeWriters--; 
+        if (activeWriters === 0 && sfxPenInstance) { 
+            sfxPenInstance.pause(); // 真实停止播放，不占用任何手机资源
+        }
+    }
+
+    // === 本地隐私数据 ===
+    function getNotes() { try { return JSON.parse(localStorage.getItem('my_diary_notes')) ||[]; } catch (e) { return[]; } }
+    function generateButlerMessage(notes) {
+        const hour = new Date().getHours();
+        let greeting = hour < 12 ? "早安，客官。" : (hour < 18 ? "午安，客官。" : "夜深了，客官。");
+
+        try {
+            const cd = JSON.parse(localStorage.getItem('my_countdown'));
+            if(cd && cd.isNew) {
+                cd.isNew = false; localStorage.setItem('my_countdown', JSON.stringify(cd));
+                return `${greeting} 账本已记下，距离客官的『${cd.event}』还有 ${cd.diffDays} 天。岁月漫长，值得等待，日历君陪您一起盼着。`;
+            }
+        } catch(e){}
+
+        const recentNote = notes.find(n => n.text.includes("委屈") || n.text.includes("累") || n.text.includes("难过"));
+        if (recentNote) { return `${greeting} 老伙计翻看账本，发现前几天您写下了『${recentNote.text.substring(0,4)}...』。不管外面风霜如何，这本黄历永远是你的避风港。`; }
+        return `${greeting} 新的一天，纸笔已备好。伴着这悠悠琴声，往事变作草芥随风散，今天想在黄历上记点什么奇遇呢？`;
+    }
+
+    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+    
+    function renderNotes() {
+        const notes = getNotes();
+        const board = document.getElementById('note-board'); board.innerHTML = "";
+        const displayNotes = notes.sort((a,b) => b.timestamp - a.timestamp).slice(0, 3);
+        displayNotes.forEach(note => {
+            const div = document.createElement('div'); div.className = 'sticky-note';
+            div.innerHTML = `<div class="note-text">${note.text}</div><div class="note-date">${note.dateStr}</div>`;
+            board.appendChild(div);
+        });
+    }
+    function openNoteModal() { document.getElementById('note-modal').style.display = 'flex'; }
+    async function saveNote() {
+        const text = document.getElementById('note-input').value.trim(); if (!text) return;
+        let notes = getNotes();
+        notes.push({ id: Date.now(), text: text, dateStr: `${currentYear}/${currentMonth + 1}/${currentDate}`, timestamp: Date.now() });
+        localStorage.setItem('my_diary_notes', JSON.stringify(notes));
+        closeModal('note-modal'); renderNotes(); document.getElementById('note-input').value = "";
+        await penWriteHTML('butler-message', "✒️ 妥了！客官的心事，老伙计已牢牢记下，绝对安全地锁在您的设备里哦！", 25);
+    }
+
+    function updateCountdownCard() {
+        try {
+            const cd = JSON.parse(localStorage.getItem('my_countdown'));
+            const textEl = document.getElementById('countdown-btn-text');
+            if (cd && cd.date) {
+                const target = new Date(cd.date);
+                const todayReset = new Date(currentYear, currentMonth, currentDate);
+                const diffDays = Math.ceil((target - todayReset) / (1000 * 60 * 60 * 24));
+                cd.diffDays = diffDays; localStorage.setItem('my_countdown', JSON.stringify(cd)); 
+                
+                if (diffDays > 0) textEl.innerHTML = `距日 <b>${diffDays}</b> 天`;
+                else if (diffDays === 0) textEl.innerHTML = `🎉 就在今日`;
+                else textEl.innerHTML = `已过 ${Math.abs(diffDays)} 天`;
+            }
+        } catch(e){}
+    }
+    function openCountdownModal() { document.getElementById('countdown-modal').style.display = 'flex'; }
+    async function saveCountdown() {
+        const event = document.getElementById('cd-event').value.trim();
+        const dateStr = document.getElementById('cd-date').value;
+        if(!event || !dateStr) return;
+        localStorage.setItem('my_countdown', JSON.stringify({ event: event, date: dateStr, isNew: true }));
+        closeModal('countdown-modal'); updateCountdownCard();
+        await penWriteHTML('butler-message', generateButlerMessage(getNotes()), 30); 
+    }
+
+    function openDetailModal(type) {
+        const modal = document.getElementById('detail-modal');
+        const titleEl = document.getElementById('detail-modal-title');
+        modal.style.display = 'flex';
+        
+        if (type === 'yi') {
+            titleEl.innerHTML = `今日宜 · ${todayYi.short}`; titleEl.style.color = 'var(--retro-red)'; titleEl.style.borderColor = 'var(--retro-red)';
+            penWriteHTML('detail-modal-text', todayYi.long, 30);
+        } else if (type === 'ji') {
+            titleEl.innerHTML = `今日忌 · ${todayJi.short}`; titleEl.style.color = 'var(--text-dark)'; titleEl.style.borderColor = 'var(--text-dark)';
+            penWriteHTML('detail-modal-text', todayJi.long, 30);
+        } else if (type === 'weather') {
+            titleEl.innerHTML = `🌤️ 观天象`; titleEl.style.color = 'var(--retro-green)'; titleEl.style.borderColor = 'var(--retro-green)';
+            penWriteHTML('detail-modal-text', globalWeatherText, 30);
+        } else if (type === 'health') {
+            titleEl.innerHTML = `💪 坊间叮嘱`; titleEl.style.color = 'var(--retro-red)'; titleEl.style.borderColor = 'var(--retro-red)';
+            currentTipIndex = (currentTipIndex + 1) % healthTips.length;
+            penWriteHTML('detail-modal-text', healthTips[currentTipIndex], 30);
+        }
+    }
+    function closeDetailModal() { 
+        document.getElementById('detail-modal').style.display = 'none'; writeTokens['detail-modal-text'] = Symbol(); 
+        if (activeWriters > 0) activeWriters--; 
+        if (activeWriters === 0) {
+            const sfxPenInstance = document.getElementById('sfx-pen');
+            if(sfxPenInstance) sfxPenInstance.pause();
+        }
+    }
+
+    // === 启动落笔 ===
+    async function beginWritingMagic() {
+        const historyText = await fetchHistoryAPI();
+        document.getElementById('history-content').innerHTML = historyText;
+
+        const notes = getNotes();
+        if(notes.length === 0) {
+            let pastDate = new Date(); pastDate.setDate(currentDate - 3); 
+            notes.push({ id: Date.now(), text: "属于您本地的专属日记本，放心记录，私密不上传哦~", dateStr: `${currentYear}/${currentMonth+1}/${pastDate.getDate()}`, timestamp: pastDate.getTime() });
+            localStorage.setItem('my_diary_notes', JSON.stringify(notes));
+        }
+        renderNotes();
+        
+        penWriteHTML('butler-message', generateButlerMessage(notes), 35);
+        globalWeatherText = await fetchWeatherTip();
+    }
+</script>
+
+</body>
+</html>
